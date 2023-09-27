@@ -34,13 +34,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
         dataString = self.data.decode('utf-8').split('\r\n')
-        
         # get the request method
-        method = dataString[0].split(' ')[0]
+        splitData = dataString[0].split(' ')
+        method = splitData[0]
         # get the request path
-        path = dataString[0].split(' ')[1]
-        print("Method: "+method)
-        print("Path: "+path)
+        path = splitData[1]
 
         # check if the request method is GET
         if method != 'GET':
@@ -66,25 +64,25 @@ class MyWebServer(socketserver.BaseRequestHandler):
             
             # check if the request path is a directory
             if os.path.isdir(filePath):
+
+                f = open(filePath+'/index.html', 'r')
+                content = f.read()
                 if path[-1] != '/':
                     self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\n",'utf-8'))
                     self.request.sendall(bytearray("Location: "+path+"/\r\n",'utf-8'))
+                    f.close()
                     return
 
-                f = open(filePath+'/index.html', 'r')
-                print("File opened")
-                content = f.read()
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
                 self.request.sendall(bytearray("Content-Type: text/html\r\n",'utf-8'))
                 self.request.sendall(bytearray(content+'\r\n','utf-8'))
+                f.close()
                 return
 
             f = open(filePath, 'r')
-            print("File opened")
             content = f.read()
             # check if the request path is a html file
             if path[-5:] == '.html':
-                print("Sending html file")
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
                 self.request.sendall(bytearray("Content-Type: text/html\r\n",'utf-8'))
                 self.request.sendall(bytearray(content+'\r\n','utf-8'))
@@ -107,8 +105,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
         except:
             self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
             return
-
-        self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
