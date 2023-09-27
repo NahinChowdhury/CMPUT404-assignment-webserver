@@ -34,6 +34,9 @@ class MyWebServer(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
         dataString = self.data.decode('utf-8').split('\r\n')
+
+        if dataString == ['']:
+            return
         # get the request method
         splitData = dataString[0].split(' ')
         method = splitData[0]
