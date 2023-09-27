@@ -1,5 +1,6 @@
 #  coding: utf-8 
 import socketserver
+import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -32,7 +33,82 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
+        dataString = self.data.decode('utf-8').split('\r\n')
+        
+        # get the request method
+        method = dataString[0].split(' ')[0]
+        # get the request path
+        path = dataString[0].split(' ')[1]
+        print("Method: "+method)
+        print("Path: "+path)
+
+        # check if the request method is GET
+        if method != 'GET':
+            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
+            return
+        
+        # check if the request path is valid
+        try:
+            filePath = './www'+path
+
+            if ('../' in path):
+                dotCounter = 0
+                valCounter = 0
+
+                for i in path.split('/'):
+                    if i == '..':
+                        dotCounter += 1
+                    else:
+                        valCounter += 1
+                if dotCounter >= valCounter:
+                    self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+                    return
+            
+            # check if the request path is a directory
+            if os.path.isdir(filePath):
+                if path[-1] != '/':
+                    self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\n",'utf-8'))
+                    self.request.sendall(bytearray("Location: "+path+"/\r\n",'utf-8'))
+                    return
+
+                f = open(filePath+'/index.html', 'r')
+                print("File opened")
+                content = f.read()
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
+                self.request.sendall(bytearray("Content-Type: text/html\r\n",'utf-8'))
+                self.request.sendall(bytearray(content+'\r\n','utf-8'))
+                return
+
+            f = open(filePath, 'r')
+            print("File opened")
+            content = f.read()
+            # check if the request path is a html file
+            if path[-5:] == '.html':
+                print("Sending html file")
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
+                self.request.sendall(bytearray("Content-Type: text/html\r\n",'utf-8'))
+                self.request.sendall(bytearray(content+'\r\n','utf-8'))
+                f.close()
+                return
+            
+            # check if the request path is a css file
+            elif path[-4:] == '.css':
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
+                self.request.sendall(bytearray("Content-Type: text/css\r\n",'utf-8'))
+                self.request.sendall(bytearray(content+'\r\n','utf-8'))
+                f.close()
+                return
+
+            else:
+                self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+                f.close()
+                return
+
+        except:
+            self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+            return
+
+        self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
