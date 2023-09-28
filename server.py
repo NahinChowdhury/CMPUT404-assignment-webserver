@@ -27,7 +27,6 @@ import os
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-
 class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
@@ -45,7 +44,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         # check if the request method is GET
         if method != 'GET':
-            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
+            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<!DOCTYPE html>\n<html><title>405 Method Not Allowed</title><body>Only GET request is allowed<body></html>",'utf-8'))
             return
         
         # check if the request path is valid
@@ -53,7 +52,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             filePath = './www'+path
 
             if ('../' in path):
-                self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+                self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<!DOCTYPE html>\n<html><title>404 Not Found</title><body>Please refrain from including .. in your path<body></html>",'utf-8'))
                 return
             
             # check if the request path is a directory
@@ -101,12 +100,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 return
 
             else:
-                self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+                self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<!DOCTYPE html>\n<html><title>404 Not Found</title><body>File not found<body></html>",'utf-8'))
                 f.close()
                 return
 
         except:
-            self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+            self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<!DOCTYPE html>\n<html><title>404 Not Found</title><body>File not found<body></html>",'utf-8'))
             return
 
 if __name__ == "__main__":
