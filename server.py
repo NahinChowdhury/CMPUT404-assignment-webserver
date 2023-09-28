@@ -53,17 +53,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
             filePath = './www'+path
 
             if ('../' in path):
-                dotCounter = 0
-                valCounter = 0
-
-                for i in path.split('/'):
-                    if i == '..':
-                        dotCounter += 1
-                    else:
-                        valCounter += 1
-                if dotCounter >= valCounter:
-                    self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
-                    return
+                self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+                return
             
             # check if the request path is a directory
             if os.path.isdir(filePath):
