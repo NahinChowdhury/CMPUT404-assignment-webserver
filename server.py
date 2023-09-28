@@ -2,7 +2,7 @@
 import socketserver
 import os
 
-# Copyright 2013 Abram Hindle, Eddie Antonio Santos
+# Copyright 2013 Abram Hindle, Eddie Antonio Santos, Nahin Chowdhury
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,10 +47,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<!DOCTYPE html>\n<html><title>405 Method Not Allowed</title><body>Only GET request is allowed<body></html>",'utf-8'))
             return
         
-        # check if the request path is valid
         try:
             filePath = './www'+path
 
+            # check if the request path is valid
             if ('../' in path):
                 self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<!DOCTYPE html>\n<html><title>404 Not Found</title><body>Please refrain from including .. in your path<body></html>",'utf-8'))
                 return
