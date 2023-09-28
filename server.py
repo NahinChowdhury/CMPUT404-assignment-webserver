@@ -73,12 +73,17 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 if path[-1] != '/':
                     self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\n",'utf-8'))
                     self.request.sendall(bytearray("Location: "+path+"/\r\n",'utf-8'))
+                    self.request.sendall(bytearray("Connection: close\r\n",'utf-8'))
                     f.close()
                     return
 
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
                 self.request.sendall(bytearray("Content-Type: text/html\r\n",'utf-8'))
-                self.request.sendall(bytearray(content+'\r\n','utf-8'))
+                self.request.sendall(bytearray("Connection: close\r\n",'utf-8'))
+
+                # Add the HTML content to the response
+                self.request.sendall(bytearray("\r\n",'utf-8'))
+                self.request.sendall(bytearray(content,'utf-8'))
                 f.close()
                 return
 
@@ -88,6 +93,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
             if path[-5:] == '.html':
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
                 self.request.sendall(bytearray("Content-Type: text/html\r\n",'utf-8'))
+                self.request.sendall(bytearray("Connection: close\r\n",'utf-8'))
+                self.request.sendall(bytearray("\r\n",'utf-8'))
                 self.request.sendall(bytearray(content+'\r\n','utf-8'))
                 f.close()
                 return
@@ -96,6 +103,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
             elif path[-4:] == '.css':
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
                 self.request.sendall(bytearray("Content-Type: text/css\r\n",'utf-8'))
+                self.request.sendall(bytearray("Connection: close\r\n",'utf-8'))
+                self.request.sendall(bytearray("\r\n",'utf-8'))
                 self.request.sendall(bytearray(content+'\r\n','utf-8'))
                 f.close()
                 return
